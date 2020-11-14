@@ -19,7 +19,7 @@ def M_to_E(M, e):
     """
     E = M
     deltaE = 1
-    while deltaE != 0:
+    while abs(deltaE) > 0.000000000001:
         prevE = E
         E = M + e*sin(E)
         deltaE = E - prevE
@@ -54,51 +54,56 @@ class EllipticalOrbit():
                  mean_anomaly=None,
                  extra_values=0):
 
-        a = semimajor_axis
-        e = eccentricity
-        I = inclination
-        L = mean_longitude
+        self.a = semimajor_axis
+        self.e = eccentricity
+        self.I = inclination
+        self.L = mean_longitude
+        self.longitude_of_periapsis = longitude_of_periapsis
+        self.longitude_of_ascending_node = longitude_of_ascending_node
+        self.argument_of_periapsis = argument_of_periapsis
+        self.mean_anomaly = mean_anomaly
+        self.extra_values = extra_values
         
-        if argument_of_periapsis is None:
-            argument_of_periapsis = longitude_of_periapsis - longitude_of_ascending_node
+        if self.argument_of_periapsis is None:
+            self.argument_of_periapsis = self.longitude_of_periapsis - self.longitude_of_ascending_node
 
-        if mean_anomaly is None:
-            mean_anomaly = L - longitude_of_periapsis + extra_values
+        if self.mean_anomaly is None:
+            self.mean_anomaly = self.L - self.longitude_of_periapsis + self.extra_values
 
-        M = mean_anomaly
-        E = M_to_E(M, e)
+        self.M = self.mean_anomaly
+        self.E = M_to_E(self.M, self.e)
 
-        b = a*sqrt(1 - e**2)
+        self.b = self.a*sqrt(1 - self.e**2)
 
-        E = radians(E)
-        argument_of_periapsis = radians(argument_of_periapsis)
-        longitude_of_ascending_node = radians(longitude_of_ascending_node)
-        I = radians(I)
+        self.E = radians(self.E)
+        self.argument_of_periapsis = radians(self.argument_of_periapsis)
+        self.longitude_of_ascending_node = radians(self.longitude_of_ascending_node)
+        self.I = radians(self.I)
 
-        self.x = a*(cos(E) - e)
-        self.y = b*sin(E)
+        self.x = self.a*(cos(self.E) - self.e)
+        self.y = self.b*sin(self.E)
         self.z = 0
         
-        sin_aop = sin(argument_of_periapsis)
-        cos_aop = cos(argument_of_periapsis)
-        sin_loa = sin(longitude_of_ascending_node)
-        cos_loa = cos(longitude_of_ascending_node)
+        self.sin_aop = sin(self.argument_of_periapsis)
+        self.cos_aop = cos(self.argument_of_periapsis)
+        self.sin_loa = sin(self.longitude_of_ascending_node)
+        self.cos_loa = cos(self.longitude_of_ascending_node)
             
-        self.xecl = (cos_aop*cos_loa - (sin_aop*sin_loa*cos(I)))*self.x + (
-                    (-sin_aop*cos_loa) - (cos_aop*sin_loa*cos(I)))*self.y
+        self.xecl = (self.cos_aop*self.cos_loa - (self.sin_aop*self.sin_loa*cos(self.I)))*self.x + (
+                    (-self.sin_aop*self.cos_loa) - (self.cos_aop*self.sin_loa*cos(self.I)))*self.y
 
-        self.yecl = (cos_aop*sin_loa + (sin_aop*cos_loa*cos(I)))*self.x + (
-                    (-sin_aop*sin_loa) + (cos_aop*cos_loa*cos(I)))*self.y
+        self.yecl = (self.cos_aop*self.sin_loa + (self.sin_aop*self.cos_loa*cos(self.I)))*self.x + (
+                    (-self.sin_aop*self.sin_loa) + (self.cos_aop*self.cos_loa*cos(self.I)))*self.y
 
-        self.zecl = (sin_aop*sin(I))*self.x + (
-                    (cos_aop*sin(I)))*self.y
+        self.zecl = (self.sin_aop*sin(self.I))*self.x + (
+                    (self.cos_aop*sin(self.I)))*self.y
 
 
 Teph = get_current_JD()
 T = (Teph - 2451545)/36525
 
-
-MercuryOrbit = EllipticalOrbit(
+def MercuryOrbit(T):
+    return EllipticalOrbit(
                 0.38709843,
                 0.20563661 + 0.00002123*T,
                 7.00559432 + -0.00590158*T,
@@ -107,7 +112,8 @@ MercuryOrbit = EllipticalOrbit(
                 48.33961819 + -0.12214182*T
                 )
 
-VenusOrbit = EllipticalOrbit(
+def VenusOrbit(T):
+    return EllipticalOrbit(
                 0.72332102 + -0.00000026*T,
                 0.00676399 + -0.00005107*T,
                 3.39777545 + 0.00043494*T,
@@ -116,7 +122,8 @@ VenusOrbit = EllipticalOrbit(
                 76.67261496 + -0.27274174*T
                 )
 
-EarthOrbit = EllipticalOrbit(
+def EarthOrbit(T):
+    return EllipticalOrbit(
                 1.00000018 + -0.00000003*T,
                 0.01673163 + -0.00003661*T,
                 -0.00054346 + -0.01337178*T,
@@ -125,7 +132,8 @@ EarthOrbit = EllipticalOrbit(
                 -5.11260389 + -0.24123856*T
                 )
 
-MarsOrbit = EllipticalOrbit(
+def MarsOrbit(T):
+    return EllipticalOrbit(
                 1.52371243 + 0.00000097*T,
                 0.09336511 + 0.00009149*T,
                 1.85181869 + -0.00724757*T,
@@ -135,7 +143,8 @@ MarsOrbit = EllipticalOrbit(
                 )
                 
 
-JupiterOrbit = EllipticalOrbit(
+def JupiterOrbit(T):
+    return EllipticalOrbit(
                 5.20248019 + -0.00002864*T,
                 0.04853590 + 0.00018026*T,
                 1.29861416 + -0.00322699*T,
@@ -145,7 +154,8 @@ JupiterOrbit = EllipticalOrbit(
                 extra_values=-0.00012452*T**2 + 0.06064060*cos(38.35125000*T) + -0.35635438*sin(38.35125000*T)
                 )
 
-SaturnOrbit = EllipticalOrbit(
+def SaturnOrbit(T):
+    return EllipticalOrbit(
                 9.54149883 + -0.00003065*T,
                 0.05550825 + -0.00032044*T,
                 2.49424102 + 0.00451969*T,
@@ -155,7 +165,8 @@ SaturnOrbit = EllipticalOrbit(
                 extra_values=0.00025899*T**2 + -0.13434469*cos(38.35125000*T) + 0.87320147*sin(38.35125000*T)
                 )
 
-UranusOrbit = EllipticalOrbit(
+def UranusOrbit(T):
+    return EllipticalOrbit(
                 19.18797948 + -0.00020455*T,
                 0.04685740 + -0.00001550*T,
                 0.77298127 + -0.00180155*T,
@@ -165,7 +176,8 @@ UranusOrbit = EllipticalOrbit(
                 extra_values=0.00058331*T**2 + -0.97731848*cos(7.67025000*T) + 0.17689245*sin(7.67025000*T)
                 )
 
-NeptuneOrbit = EllipticalOrbit(
+def NeptuneOrbit(T):
+    return EllipticalOrbit(
                 30.06952752 + 0.00006447*T,
                 0.00895439 + 0.00000818*T,
                 1.77005520 + 0.00022400*T,
@@ -175,7 +187,8 @@ NeptuneOrbit = EllipticalOrbit(
                 extra_values=-0.00041348*T**2 + 0.68346318*cos(7.67025000*T) + -0.10162547*sin(7.67025000*T)
                 )
 
-PlutoOrbit = EllipticalOrbit(
+def PlutoOrbit(T):
+    return EllipticalOrbit(
                 39.48686035 + 0.00449751*T,
                 0.24885238 + 0.00006016*T,
                 17.14104260 + 0.00000501*T,
